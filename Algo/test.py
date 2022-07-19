@@ -82,13 +82,13 @@ for item in b.items:
     item_info["id"] = count
     item_info["mass"] = str(item.weight)
     item_info["position"] = {
-        "x": round(float(item.position[0]) * 0.001 + round(float(dimension[0])) * 0.001 / 2, 4),
+        "x": round(float(item.position[2]) * 0.001 + round(float(dimension[2])) * 0.001 / 2, 4),
         "y": round(float(item.position[1]) * 0.001 + round(float(dimension[1])) * 0.001 / 2, 4),
-        "z": round(float(item.position[2]) * 0.001 + round(float(dimension[2])) * 0.001 / 2, 4)}
+        "z": round(float(item.position[0]) * 0.001 + round(float(dimension[0])) * 0.001 / 2, 4)}
     item_info["size"] = {
-        "width": round(float(dimension[2]) * 0.001, 4), 
+        "width": round(float(dimension[0]) * 0.001, 4), 
         "height": round(float(dimension[1]) * 0.001, 4),
-        "length": round(float(dimension[0]) * 0.001, 4) 
+        "length": round(float(dimension[2]) * 0.001, 4) 
         }
     item_info["sort"] = 1
     item_info["stacking"] = True
@@ -115,14 +115,14 @@ for item in b.unfitted_items:
 output_dict = {
 "cargoSpace": {
 "loading_size": {
-"length": bin_ZYX[2] * 0.001,
+"length": bin_ZYX[0] * 0.001,
 "height": bin_ZYX[1] * 0.001,
-"width": bin_ZYX[0] * 0.001
+"width": bin_ZYX[2] * 0.001
 },
 "position": [
-bin_ZYX[2] * 0.001 / 2, #L
+bin_ZYX[0] * 0.001 / 2, #L
 bin_ZYX[1] * 0.001 / 2, #H
-bin_ZYX[0] * 0.001 / 2 #W
+bin_ZYX[2] * 0.001 / 2 #W
 ],
 "type": "pallet"
 },

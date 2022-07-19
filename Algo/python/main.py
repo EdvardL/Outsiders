@@ -272,9 +272,9 @@ class Packer:
                 if axis == Axis.WIDTH:
                     pivot = [ib.position[0] + w,ib.position[1],ib.position[2]]
                 elif axis == Axis.HEIGHT:
-                    pivot = [ib.position[0],ib.position[1] + h,ib.position[2]]
-                elif axis == Axis.LENGTH:
                     pivot = [ib.position[0],ib.position[1],ib.position[2] + d]
+                elif axis == Axis.LENGTH:
+                    pivot = [ib.position[0],ib.position[1] + h,ib.position[2]]
                     
                 if bin.putItem(item, pivot, axis):
                     fitted = True
@@ -301,7 +301,6 @@ class Packer:
             
         self.bins.sort(key=lambda bin: bin.getVolume(), reverse=bigger_first)
         self.items.sort(key=lambda item: item.getVolume(), reverse=bigger_first)
-        self.items.sort(key=lambda item: item.level, reverse=False)
 
         for bin in self.bins:
             # pack item to bin
