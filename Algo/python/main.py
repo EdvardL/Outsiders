@@ -77,9 +77,9 @@ class Bin:
     def __init__(self, partno, ZYX,put_type=1):
         ''' '''
         self.partno = partno
-        self.width = ZYX[2]
-        self.length = ZYX[0]
-        self.height = ZYX[1]
+        self.width = ZYX['width']
+        self.length = ZYX['length']
+        self.height = ZYX['height']
         self.items = []
         self.fit_items = np.array([[0,ZYX[0],0,ZYX[1],0,0]])
         self.unfitted_items = []
