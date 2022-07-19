@@ -14,9 +14,9 @@ class Item:
         ''' '''
         self.partno = partno
         self.typeof = typeof
-        self.width = ZYX[2]
-        self.height = ZYX[1]
-        self.length = ZYX[0]
+        self.width = ZYX['width']
+        self.height = ZYX['height']
+        self.length = ZYX['length']
         self.weight = weight
         # Packing Priority level ,choose 1-3
         self.level = level
@@ -81,7 +81,7 @@ class Bin:
         self.length = ZYX['length']
         self.height = ZYX['height']
         self.items = []
-        self.fit_items = np.array([[0,ZYX[0],0,ZYX[1],0,0]])
+        self.fit_items = np.array([[0,ZYX['length'],0,ZYX['height'],0,0]])
         self.unfitted_items = []
         self.number_of_decimals = DEFAULT_NUMBER_OF_DECIMALS
         self.fix_point = False

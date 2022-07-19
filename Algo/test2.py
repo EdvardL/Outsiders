@@ -76,14 +76,14 @@ def Pack(filename):
     output_dict = {
     "cargoSpace": {
     "loading_size": {
-    "length": bin_ZYX[0] * 0.001,
-    "height": bin_ZYX[1] * 0.001,
-    "width": bin_ZYX[2] * 0.001
+    "length": bin_ZYX['length'] * 0.001,
+    "height": bin_ZYX['height'] * 0.001,
+    "width": bin_ZYX['width'] * 0.001
     },
     "position": [
-    bin_ZYX[0] * 0.001 / 2, #L
-    bin_ZYX[1] * 0.001 / 2, #H
-    bin_ZYX[2] * 0.001 / 2 #W
+    bin_ZYX['length'] * 0.001 / 2, #L
+    bin_ZYX['height'] * 0.001 / 2, #H
+    bin_ZYX['width'] * 0.001 / 2 #W
     ],
     "type": "pallet"
     },
