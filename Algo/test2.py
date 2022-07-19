@@ -91,7 +91,7 @@ def Pack(filename):
     "unpacked": unpacked_cargos_info
     }
 
-    with open("../output/"+ filename, 'w') as fp:
+    with open("../output/"+ filename.split('/')[-1], 'w') as fp:
         json.dump(output_dict, fp)
     print(output_dict)
 
