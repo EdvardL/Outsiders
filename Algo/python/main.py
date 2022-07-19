@@ -2,22 +2,21 @@ from .constants import RotationType, Axis
 from .auxiliary_methods import intersect, set2Decimal
 import numpy as np
 # required to plot a representation of Bin and contained items 
-from matplotlib.patches import Rectangle,Circle
+from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.art3d as art3d
-from collections import Counter
 DEFAULT_NUMBER_OF_DECIMALS = 0
 START_POSITION = [0, 0, 0]
 
 
 class Item:
-    def __init__(self, partno, ZXY, weight, level, color='yellow', updown=True, typeof='cube'):
+    def __init__(self, partno, ZYX, weight, level, color='yellow', updown=True, typeof='cube'):
         ''' '''
         self.partno = partno
         self.typeof = typeof
-        self.width = ZXY[0]
-        self.length = ZXY[1]
-        self.height = ZXY[2]
+        self.width = ZYX[0]
+        self.height = ZYX[1]
+        self.length = ZYX[2]
         self.weight = weight
         # Packing Priority level ,choose 1-3
         self.level = level
@@ -54,10 +53,9 @@ class Item:
     
         return set2Decimal(a[0] * a[1] , self.number_of_decimals)
 
-    # ZXY = WHD
     def getDimension(self):
         ''' rotation type '''
-        if self.rotation_type == RotationType.RT_ZXY:
+        if self.rotation_type == RotationType.RT_ZYX:
             dimension = [self.width, self.height, self.length]
         elif self.rotation_type == RotationType.RT_XZY:
             dimension = [self.height, self.width, self.length]
@@ -67,7 +65,7 @@ class Item:
             dimension = [self.length, self.height, self.width]
         elif self.rotation_type == RotationType.RT_YZX:
             dimension = [self.length, self.width, self.height]
-        elif self.rotation_type == RotationType.RT_ZYX:
+        elif self.rotation_type == RotationType.RT_ZXY: #############
             dimension = [self.width, self.length, self.height]
         else:
             dimension = []
@@ -76,14 +74,14 @@ class Item:
 
 
 class Bin:
-    def __init__(self, partno, ZXY,put_type=1):
+    def __init__(self, partno, ZYX,put_type=1):
         ''' '''
         self.partno = partno
-        self.width = ZXY[0]
-        self.length = ZXY[1]
-        self.height = ZXY[2]
+        self.width = ZYX[0]
+        self.length = ZYX[2]
+        self.height = ZYX[1]
         self.items = []
-        self.fit_items = np.array([[0,ZXY[0],0,ZXY[1],0,0]])
+        self.fit_items = np.array([[0,ZYX[0],0,ZYX[1],0,0]])
         self.unfitted_items = []
         self.number_of_decimals = DEFAULT_NUMBER_OF_DECIMALS
         self.fix_point = False
@@ -300,12 +298,9 @@ class Packer:
 
         for item in self.items:
             item.formatNumbers(number_of_decimals)
-        # add binding attribute
-        self.binding = binding
-        # Bin : sorted by volumn
+            
         self.bins.sort(key=lambda bin: bin.getVolume(), reverse=bigger_first)
         self.items.sort(key=lambda item: item.getVolume(), reverse=bigger_first)
-        # self.items.sort(key=lambda item: item.getMaxArea(), reverse=bigger_first)
         self.items.sort(key=lambda item: item.level, reverse=False)
 
         for bin in self.bins:
@@ -377,24 +372,6 @@ class Painter:
             art3d.pathpatch_2d_to_3d(p5, z=y, zdir="y")
             art3d.pathpatch_2d_to_3d(p6, z=y + dy, zdir="y")
 
-    def _plotCylinder(self, ax, x, y, z, dx, dy, dz, color='red',mode=2):
-        """ Auxiliary function to plot a Cylinder  """
-        # plot the two circles above and below the cylinder
-        p = Circle((x+dx/2,y+dy/2),radius=dx/2,color=color,ec='black')
-        p2 = Circle((x+dx/2,y+dy/2),radius=dx/2,color=color,ec='black')
-        ax.add_patch(p)
-        ax.add_patch(p2)
-        art3d.pathpatch_2d_to_3d(p, z=z, zdir="z")
-        art3d.pathpatch_2d_to_3d(p2, z=z+dz, zdir="z")
-        # plot a circle in the middle of the cylinder
-        center_z = np.linspace(0, dz, 15)
-        theta = np.linspace(0, 2*np.pi, 15)
-        theta_grid, z_grid=np.meshgrid(theta, center_z)
-        x_grid = dx / 2 * np.cos(theta_grid) + x + dx / 2
-        y_grid = dy / 2 * np.sin(theta_grid) + y + dy / 2
-        z_grid = z_grid + z
-        ax.plot_surface(x_grid, y_grid, z_grid,shade=False,fc=color,ec='black',alpha=1,color=color)
-        
     def plotBoxAndItems(self,title=""):
         """ side effective. Plot the Bin and the items it contains. """
         fig = plt.figure()

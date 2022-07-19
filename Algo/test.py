@@ -11,19 +11,19 @@ json_file = open("../Data/Input/0/30_cl.json")
 data_dict = json.load(json_file)
 
 bin_id = data_dict['cargo_space']['id']
-bin_ZXY = data_dict['cargo_space']['size']
+bin_ZYX = data_dict['cargo_space']['size']
 
-# self, partno, ZXY, weight,put_type=1
-bin = Bin(partno=bin_id, ZXY=bin_ZXY, put_type=0)
+# self, partno, ZYX, weight,put_type=1
+bin = Bin(partno=bin_id, ZYX=bin_ZYX, put_type=0)
 packer.addBin(bin)
 
 for item_data in data_dict['cargo_groups']:
     for i in range(item_data['count']):
         item_id = item_data['group_id']
-        item_ZXY = item_data['size']
+        item_ZYX = item_data['size']
         item_weight = item_data['mass']
-        # self, partno,typeof, ZXY, weight, level, updown, color
-        packer.addItem(Item(partno=item_id, typeof='cube', ZXY=item_ZXY, weight=item_weight, level=1, updown=True, color='red'))
+        # self, partno,typeof, ZYX, weight, level, updown, color
+        packer.addItem(Item(partno=item_id, typeof='cube', ZYX=item_ZYX, weight=item_weight, level=1, updown=True, color='red'))
 
 packer.pack(bigger_first=True,distribute_items=False,fix_point=True,number_of_decimals=0)
 
@@ -74,12 +74,21 @@ count = 1
 for item in b.items:
     dimension = item.getDimension()
     item_info = {}
-    item_info["calculated_size"] = {"width": float(item.width), "length": float(item.length), "height": float(item.height)}
+    item_info["calculated_size"] = {
+        "width": round(float(item.width) * 0.001, 4),
+        "length": round(float(item.length) * 0.001, 4), 
+        "height": round(float(item.height) * 0.001, 4)}
     item_info["cargo_id"] = item.partno
     item_info["id"] = count
     item_info["mass"] = str(item.weight)
-    item_info["position"] = {"z": float(item.position[0]), "x": float(item.position[1]), "y": float(item.position[2])}
-    item_info["size"] = {"width": float(item.width), "length": float(item.length), "height": float(item.height)}
+    item_info["position"] = {
+        "x": round(float(item.position[1]) * 0.001 + round(float(dimension[2])) * 0.001 / 2, 4),
+        "y": round(float(item.position[2]) * 0.001 + round(float(dimension[1])) * 0.001 / 2, 4),
+        "z": round(float(item.position[0]) * 0.001 + round(float(dimension[0])) * 0.001 / 2, 4)}
+    item_info["size"] = {
+        "width": round(float(dimension[0]) * 0.001, 4), 
+        "length": round(float(dimension[2]) * 0.001, 4), 
+        "height": round(float(dimension[1]) * 0.001, 4)}
     item_info["sort"] = 1
     item_info["stacking"] = True
     item_info["turnover"] = True
@@ -95,8 +104,8 @@ for item in b.unfitted_items:
     item_info["group_id"] =  item.partno,
     item_info["id"] = 0,
     item_info["mass"] = str(item.weight),
-    item_info["position"] = {"x": -1, "y": -1, "z": -1},
-    item_info["size"] = {"height": float(item.width), "length": float(item.height), "width": float(item.length)},
+    item_info["position"] = {"x": -100, "y": -100, "z": -100},
+    item_info["size"] = {"height": float(item.height), "length": float(item.length), "width": float(item.width)},
     item_info["sort"] = 1
     item_info["stacking"] = True
     item_info["turnover"] = True
@@ -105,14 +114,14 @@ for item in b.unfitted_items:
 output_dict = {
 "cargoSpace": {
 "loading_size": {
-"height": bin_ZXY[1]/1000,
-"length": bin_ZXY[2]/1000,
-"width": bin_ZXY[0]/1000
+"length": bin_ZYX[2] * 0.001,
+"height": bin_ZYX[1] * 0.001,
+"width": bin_ZYX[0] * 0.001
 },
 "position": [
-bin_ZXY[1]/2/1000,
-bin_ZXY[2]/2/1000,
-bin_ZXY[0]/2/1000
+bin_ZYX[2] * 0.001 / 2, #L
+bin_ZYX[1] * 0.001 / 2, #H
+bin_ZYX[0] * 0.001 / 2 #W
 ],
 "type": "pallet"
 },
