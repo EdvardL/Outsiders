@@ -97,7 +97,7 @@ def Pack(filename):
 
     return b
 
-dirname = './var/tmp/hackathon/data1'
+dirname = '/var/tmp/hackathon/data1'
 dirnames = []
 filenames = []
 for dir in os.listdir(dirname):
