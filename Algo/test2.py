@@ -10,16 +10,16 @@ def Pack(filename):
     packer = Packer()
 
     bin_id = d['cargo_space']['id']
-    bin_ZXY = d['cargo_space']['size']
+    bin_ZYX = d['cargo_space']['size']
 
     # self, partno, WHD, put_type=1
-    bin = Bin(partno=bin_id, ZXY=bin_ZXY, put_type=0)
+    bin = Bin(partno=bin_id, ZYX=bin_ZYX, put_type=0)
     packer.addBin(bin)
     # self, partno,typeof, WHD, weight, level, updown, color
     for item in d['cargo_groups']:
         packer.addItem(Item(partno=item['group_id'], 
                             typeof='cube',
-                            ZXY=item['size'],
+                            ZYX=item['size'],
                             weight=item['mass'],
                             level=1,
                             updown=item['turnover'],
@@ -35,12 +35,22 @@ def Pack(filename):
     for item in b.items:
         dimension = item.getDimension()
         item_info = {}
-        item_info["calculated_size"] = {"height": str(dimension[2]), "length": str(dimension[1]), "width": str(dimension[0])}
+        item_info["calculated_size"] = {
+            "width": round(float(item.width) * 0.001, 4),
+            "length": round(float(item.length) * 0.001, 4), 
+            "height": round(float(item.height) * 0.001, 4)}
         item_info["cargo_id"] = item.partno
         item_info["id"] = count
         item_info["mass"] = str(item.weight)
-        item_info["position"] = {"x": str(item.position[1]), "y": str(item.position[2]), "z": str(item.position[0])}
-        item_info["size"] = {"height": str(item.length), "length": str(item.height), "width": str(item.width)}
+        item_info["position"] = {
+            "x": round(float(item.position[2]) * 0.001 + round(float(dimension[2])) * 0.001 / 2, 4),
+            "y": round(float(item.position[1]) * 0.001 + round(float(dimension[1])) * 0.001 / 2, 4),
+            "z": round(float(item.position[0]) * 0.001 + round(float(dimension[0])) * 0.001 / 2, 4)}
+        item_info["size"] = {
+            "width": round(float(dimension[0]) * 0.001, 4), 
+            "height": round(float(dimension[1]) * 0.001, 4),
+            "length": round(float(dimension[2]) * 0.001, 4) 
+            }
         item_info["sort"] = 1
         item_info["stacking"] = True
         item_info["turnover"] = True
@@ -48,6 +58,7 @@ def Pack(filename):
         count += 1
         packed_cargos_info.append(item_info)
 
+    print(packed_cargos_info)
     unpacked_cargos_info = []
 
     for item in b.unfitted_items:
@@ -55,8 +66,8 @@ def Pack(filename):
         item_info["group_id"] =  item.partno,
         item_info["id"] = 0,
         item_info["mass"] = str(item.weight),
-        item_info["position"] = {"x": -1, "y": -1, "z": -1},
-        item_info["size"] = {"height": str(item.width), "length": str(item.height), "width": str(item.length)},
+        item_info["position"] = {"x": -100, "y": -100, "z": -100},
+        item_info["size"] = {"height": float(item.height), "length": float(item.length), "width": float(item.width)},
         item_info["sort"] = 1
         item_info["stacking"] = True
         item_info["turnover"] = True
@@ -65,14 +76,14 @@ def Pack(filename):
     output_dict = {
     "cargoSpace": {
     "loading_size": {
-    "height": bin_ZXY[1],
-    "length": bin_ZXY[2],
-    "width": bin_ZXY[0]
+    "length": bin_ZYX[0] * 0.001,
+    "height": bin_ZYX[1] * 0.001,
+    "width": bin_ZYX[2] * 0.001
     },
     "position": [
-    bin_ZXY[1]/2,
-    bin_ZXY[2]/2,
-    bin_ZXY[0]/2
+    bin_ZYX[0] * 0.001 / 2, #L
+    bin_ZYX[1] * 0.001 / 2, #H
+    bin_ZYX[2] * 0.001 / 2 #W
     ],
     "type": "pallet"
     },
@@ -80,13 +91,13 @@ def Pack(filename):
     "unpacked": unpacked_cargos_info
     }
 
-    with open("../Data/Output/3"+ filename, 'w') as fp:
+    with open("../output/"+ filename, 'w') as fp:
         json.dump(output_dict, fp)
     print(output_dict)
 
     return b
 
-dirname = '../Data/Input'
+dirname = './var/tmp/hackathon/data1'
 dirnames = []
 filenames = []
 for dir in os.listdir(dirname):
