@@ -101,7 +101,7 @@ dirname = '/var/tmp/hackathon/data1'
 dirnames = []
 filenames = []
 for file in os.listdir(dirname):
-    filename = file
+    filename = dirname + '/' + file
     filenames.append(filename)
 
     start = time.time()
