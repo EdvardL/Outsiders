@@ -16,12 +16,11 @@ def rectIntersect(item1, item2, x, y):
 
     return ix < (d1[x]+d2[x])/2 and iy < (d1[y]+d2[y])/2
 
-
 def intersect(item1, item2):
     return (
         rectIntersect(item1, item2, Axis.WIDTH, Axis.HEIGHT) and
-        rectIntersect(item1, item2, Axis.HEIGHT, Axis.DEPTH) and
-        rectIntersect(item1, item2, Axis.WIDTH, Axis.DEPTH)
+        rectIntersect(item1, item2, Axis.HEIGHT, Axis.LENGTH) and
+        rectIntersect(item1, item2, Axis.WIDTH, Axis.LENGTH)
     )
 
 

@@ -1,19 +1,19 @@
 class RotationType:
-    RT_WHD = 0
-    RT_HWD = 1
-    RT_HDW = 2
-    RT_DHW = 3
-    RT_DWH = 4
-    RT_WDH = 5
+    RT_ZXY = 0
+    RT_XZY = 1
+    RT_XYZ = 2
+    RT_YXZ = 3
+    RT_YZX = 4
+    RT_ZYX = 5
 
-    ALL = [RT_WHD, RT_HWD, RT_HDW, RT_DHW, RT_DWH, RT_WDH]
+    ALL = [RT_ZXY, RT_XZY, RT_XYZ, RT_YXZ, RT_YZX, RT_ZYX]
     # un upright or un updown
-    Notupdown = [RT_WHD,RT_HWD]
+    Notupdown = [RT_ZXY,RT_XZY]
  
 class Axis:
     WIDTH = 0
     HEIGHT = 1
-    DEPTH = 2
+    LENGTH = 2
 
-    ALL = [WIDTH, HEIGHT, DEPTH]
+    ALL = [WIDTH, HEIGHT, LENGTH]
 

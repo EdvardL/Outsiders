@@ -10,15 +10,14 @@ DEFAULT_NUMBER_OF_DECIMALS = 0
 START_POSITION = [0, 0, 0]
 
 
-
 class Item:
-    def __init__(self, partno,typeof, WHD, weight, level, updown, color):
+    def __init__(self, partno, ZXY, weight, level, color='yellow', updown=True, typeof='cube'):
         ''' '''
         self.partno = partno
         self.typeof = typeof
-        self.width = WHD[0]
-        self.height = WHD[1]
-        self.depth = WHD[2]
+        self.width = ZXY[0]
+        self.length = ZXY[1]
+        self.height = ZXY[2]
         self.weight = weight
         # Packing Priority level ,choose 1-3
         self.level = level
@@ -34,41 +33,42 @@ class Item:
         ''' '''
         self.width = set2Decimal(self.width, number_of_decimals)
         self.height = set2Decimal(self.height, number_of_decimals)
-        self.depth = set2Decimal(self.depth, number_of_decimals)
+        self.length = set2Decimal(self.length, number_of_decimals)
         self.weight = set2Decimal(self.weight, number_of_decimals)
         self.number_of_decimals = number_of_decimals
 
     def string(self):
         ''' '''
         return "%s(%sx%sx%s, weight: %s) pos(%s) rt(%s) vol(%s)" % (
-            self.partno, self.width, self.height, self.depth, self.weight,
+            self.partno, self.width, self.height, self.length, self.weight,
             self.position, self.rotation_type, self.getVolume()
         )
 
     def getVolume(self):
         ''' '''
-        return set2Decimal(self.width * self.height * self.depth, self.number_of_decimals)
+        return set2Decimal(self.width * self.height * self.length, self.number_of_decimals)
 
     def getMaxArea(self):
         ''' '''
-        a = sorted([self.width,self.height,self.depth],reverse=True) if self.updown == True else [self.width,self.height,self.depth]
+        a = sorted([self.width,self.height,self.length],reverse=True) if self.updown == True else [self.width,self.height,self.length]
     
         return set2Decimal(a[0] * a[1] , self.number_of_decimals)
 
+    # ZXY = WHD
     def getDimension(self):
         ''' rotation type '''
-        if self.rotation_type == RotationType.RT_WHD:
-            dimension = [self.width, self.height, self.depth]
-        elif self.rotation_type == RotationType.RT_HWD:
-            dimension = [self.height, self.width, self.depth]
-        elif self.rotation_type == RotationType.RT_HDW:
-            dimension = [self.height, self.depth, self.width]
-        elif self.rotation_type == RotationType.RT_DHW:
-            dimension = [self.depth, self.height, self.width]
-        elif self.rotation_type == RotationType.RT_DWH:
-            dimension = [self.depth, self.width, self.height]
-        elif self.rotation_type == RotationType.RT_WDH:
-            dimension = [self.width, self.depth, self.height]
+        if self.rotation_type == RotationType.RT_ZXY:
+            dimension = [self.width, self.height, self.length]
+        elif self.rotation_type == RotationType.RT_XZY:
+            dimension = [self.height, self.width, self.length]
+        elif self.rotation_type == RotationType.RT_XYZ:
+            dimension = [self.height, self.length, self.width]
+        elif self.rotation_type == RotationType.RT_YXZ:
+            dimension = [self.length, self.height, self.width]
+        elif self.rotation_type == RotationType.RT_YZX:
+            dimension = [self.length, self.width, self.height]
+        elif self.rotation_type == RotationType.RT_ZYX:
+            dimension = [self.width, self.length, self.height]
         else:
             dimension = []
 
@@ -76,15 +76,14 @@ class Item:
 
 
 class Bin:
-    def __init__(self, partno, WHD, max_weight,put_type=1):
+    def __init__(self, partno, ZXY,put_type=1):
         ''' '''
         self.partno = partno
-        self.width = WHD[0]
-        self.height = WHD[1]
-        self.depth = WHD[2]
-        self.max_weight = max_weight
+        self.width = ZXY[0]
+        self.length = ZXY[1]
+        self.height = ZXY[2]
         self.items = []
-        self.fit_items = np.array([[0,WHD[0],0,WHD[1],0,0]])
+        self.fit_items = np.array([[0,ZXY[0],0,ZXY[1],0,0]])
         self.unfitted_items = []
         self.number_of_decimals = DEFAULT_NUMBER_OF_DECIMALS
         self.fix_point = False
@@ -96,31 +95,21 @@ class Bin:
         ''' '''
         self.width = set2Decimal(self.width, number_of_decimals)
         self.height = set2Decimal(self.height, number_of_decimals)
-        self.depth = set2Decimal(self.depth, number_of_decimals)
-        self.max_weight = set2Decimal(self.max_weight, number_of_decimals)
+        self.length = set2Decimal(self.length, number_of_decimals)
         self.number_of_decimals = number_of_decimals
 
     def string(self):
         ''' '''
-        return "%s(%sx%sx%s, max_weight:%s) vol(%s)" % (
-            self.partno, self.width, self.height, self.depth, self.max_weight,
+        return "%s(%sx%sx%s) vol(%s)" % (
+            self.partno, self.width, self.height, self.length,
             self.getVolume()
         )
 
     def getVolume(self):
         ''' '''
         return set2Decimal(
-            self.width * self.height * self.depth, self.number_of_decimals
+            self.width * self.height * self.length, self.number_of_decimals
         )
-
-    def getTotalWeight(self):
-        ''' '''
-        total_weight = 0
-
-        for item in self.items:
-            total_weight += item.weight
-
-        return set2Decimal(total_weight, self.number_of_decimals)
 
     def putItem(self, item, pivot,axis=None):
         ''' put item in bin '''
@@ -135,7 +124,7 @@ class Bin:
             if (
                 self.width < pivot[0] + dimension[0] or
                 self.height < pivot[1] + dimension[1] or
-                self.depth < pivot[2] + dimension[2]
+                self.length < pivot[2] + dimension[2]
             ):
                 continue
 
@@ -147,15 +136,6 @@ class Bin:
                     break
 
             if fit:
-                # cal total weight
-                if self.getTotalWeight() + item.weight > self.max_weight:
-                    fit = False
-                    return fit
-
-                if item.partno == 'Dyson DC34 Animal8':
-                    print(123)
-                    # self.fix_point = False
-
                 if self.fix_point == True :
                         
                     [w,h,d] = dimension
@@ -166,8 +146,8 @@ class Bin:
                         y = self.checkHeight([x,x+float(w),y,y+float(h),z,z+float(d)])
                         # fix width
                         x = self.checkWidth([x,x+float(w),y,y+float(h),z,z+float(d)])
-                        # fix depth
-                        z = self.checkDepth([x,x+float(w),y,y+float(h),z,z+float(d)])
+                        # fix length
+                        z = self.checkLength([x,x+float(w),y,y+float(h),z,z+float(d)])
 
                     self.fit_items = np.append(self.fit_items,np.array([[x,x+float(w),y,y+float(h),z,z+float(d)]]),axis=0)
                     item.position = [set2Decimal(x),set2Decimal(y),set2Decimal(z)]
@@ -184,9 +164,9 @@ class Bin:
 
         return fit
 
-    def checkDepth(self,unfix_point):
+    def checkLength(self,unfix_point):
         ''' fix item position z '''
-        z_ = [[0,0],[float(self.depth),float(self.depth)]]
+        z_ = [[0,0],[float(self.length),float(self.length)]]
         for j in self.fit_items:
             # creat x set
             x_bottom = set([i for i in range(int(j[0]),int(j[1]))])
@@ -197,11 +177,11 @@ class Bin:
             # find intersection on x set and y set.
             if len(x_bottom & x_top) != 0 and len(y_bottom & y_top) != 0 :
                 z_.append([float(j[4]),float(j[5])])
-        top_depth = unfix_point[5] - unfix_point[4]
+        top_length = unfix_point[5] - unfix_point[4]
         # find diff set on z_.
         z_ = sorted(z_, key = lambda z_ : z_[1])
         for j in range(len(z_)-1):
-            if z_[j+1][0] -z_[j][1] >= top_depth:
+            if z_[j+1][0] -z_[j][1] >= top_length:
                 return z_[j][1]
         return unfix_point[4]
 
@@ -295,7 +275,7 @@ class Packer:
                     pivot = [ib.position[0] + w,ib.position[1],ib.position[2]]
                 elif axis == Axis.HEIGHT:
                     pivot = [ib.position[0],ib.position[1] + h,ib.position[2]]
-                elif axis == Axis.DEPTH:
+                elif axis == Axis.LENGTH:
                     pivot = [ib.position[0],ib.position[1],ib.position[2] + d]
                     
                 if bin.putItem(item, pivot, axis):
@@ -307,105 +287,10 @@ class Packer:
             bin.unfitted_items.append(item)
 
     def putOrder(self):
-        '''Arrange the order of items '''
-        r = []
-        for i in self.bins:
-            # open top container
-            if i.put_type == 2:
-                i.items.sort(key=lambda item: item.position[0], reverse=False)
-                i.items.sort(key=lambda item: item.position[1], reverse=False)
-                i.items.sort(key=lambda item: item.position[2], reverse=False)
-            # general container
-            elif i.put_type == 1:
-                i.items.sort(key=lambda item: item.position[1], reverse=False)
-                i.items.sort(key=lambda item: item.position[2], reverse=False)
-                i.items.sort(key=lambda item: item.position[0], reverse=False)
-            else :
-                pass
+        self.items.sort(key=lambda item: item.position[1], reverse=False)
+        self.items.sort(key=lambda item: item.position[2], reverse=False)
+        self.items.sort(key=lambda item: item.position[0], reverse=False)
         return
-
-    # Deviation Of Cargo gravity distribution
-    # def gravityCenter(self):
-    #     ''' 
-    #     Deviation Of Cargo gravity distribution
-    #     ''' 
-    #     w = int(self.bins[0].width)
-    #     h = int(self.bins[0].height)
-    #     d = int(self.bins[0].depth)
-
-    #     area1 = [set(range(0,w//2+1)),set(range(0,h//2+1)),0]
-    #     area2 = [set(range(w//2+1,w+1)),set(range(0,h//2+1)),0]
-    #     area3 = [set(range(0,w//2+1)),set(range(h//2+1,h+1)),0]
-    #     area4 = [set(range(w//2+1,w+1)),set(range(h//2+1,h+1)),0]
-    #     area = [area1,area2,area3,area4]
-
-    #     for i in self.bins[0].items:
-
-    #         x_st = int(i.position[0])
-    #         y_st = int(i.position[1])
-    #         if i.rotation_type == 0:
-    #             x_ed = int(i.position[0] + i.width)
-    #             y_ed = int(i.position[1] + i.height)
-    #         elif i.rotation_type == 1:
-    #             x_ed = int(i.position[0] + i.height)
-    #             y_ed = int(i.position[1] + i.width)
-    #         elif i.rotation_type == 2:
-    #             x_ed = int(i.position[0] + i.height)
-    #             y_ed = int(i.position[1] + i.depth)
-    #         elif i.rotation_type == 3:
-    #             x_ed = int(i.position[0] + i.depth)
-    #             y_ed = int(i.position[1] + i.height)
-    #         elif i.rotation_type == 4:
-    #             x_ed = int(i.position[0] + i.depth)
-    #             y_ed = int(i.position[1] + i.width)
-    #         elif i.rotation_type == 5:
-    #             x_ed = int(i.position[0] + i.width)
-    #             y_ed = int(i.position[1] + i.depth)
-
-    #         x_set = set(range(x_st,int(x_ed)+1))
-    #         y_set = set(range(y_st,y_ed+1))
-
-    #         # cal gravity distribution
-    #         for j in range(len(area)):
-    #             if x_set.issubset(area[j][0]) and y_set.issubset(area[j][1]) : 
-    #                 area[j][2] += int(i.weight)
-    #                 break
-    #             # include x and !include y
-    #             elif x_set.issubset(area[j][0]) == True and y_set.issubset(area[j][1]) == False and len(y_set & area[j][1]) != 0 : 
-    #                 y = len(y_set & area[j][1]) / (y_ed - y_st) * int(i.weight)
-    #                 area[j][2] += y
-    #                 if j >= 2 :
-    #                     area[j-2][2] += (int(i.weight) - x)
-    #                 else :
-    #                     area[j+2][2] += (int(i.weight) - y)
-    #                 break
-    #             # include y and !include x
-    #             elif x_set.issubset(area[j][0]) == False and y_set.issubset(area[j][1]) == True and len(x_set & area[j][0]) != 0 : 
-    #                 x = len(x_set & area[j][0]) / (x_ed - x_st) * int(i.weight)
-    #                 area[j][2] += x
-    #                 if j >= 2 :
-    #                     area[j-2][2] += (int(i.weight) - x)
-    #                 else :
-    #                     area[j+2][2] += (int(i.weight) - x)
-    #                 break
-    #             # !include x and !include y
-    #             elif x_set.issubset(area[j][0])== False and y_set.issubset(area[j][1]) == False and len(y_set & area[j][1]) != 0  and len(x_set & area[j][0]) != 0 :
-    #                 all = (y_ed - y_st) * (x_ed - x_st)
-    #                 y = len(y_set & area[0][1])
-    #                 y_2 = y_ed - y_st - y
-    #                 x = len(x_set & area[0][0])
-    #                 x_2 = x_ed - x_st - x
-    #                 area[0][2] += x * y / all * int(i.weight)
-    #                 area[1][2] += x_2 * y / all * int(i.weight)
-    #                 area[2][2] += x * y_2 / all * int(i.weight)
-    #                 area[3][2] += x_2 * y_2 / all * int(i.weight)
-    #                 break
-            
-    #     r = [area[0][2],area[1][2],area[2][2],area[3][2]]
-    #     result = []
-    #     for i in r :
-    #         result.append(round(i / sum(r) * 100,2))
-    #     return result
 
     def pack(self, bigger_first=False,distribute_items=False,fix_point=True,binding=[],number_of_decimals=DEFAULT_NUMBER_OF_DECIMALS):
         '''pack master func '''
@@ -450,10 +335,6 @@ class Packer:
                     self.pack2Bin(bin, item,fix_point)
         # put order of items
         self.putOrder()
-        # Deviation Of Cargo Gravity Center 
-        # self.bins[0].gravity = self.gravityCenter()
-
-
 
 class Painter:
     def __init__(self,bins):
@@ -461,7 +342,7 @@ class Painter:
         self.items = bins.items
         self.width = bins.width
         self.height = bins.height
-        self.depth = bins.depth
+        self.length = bins.length
 
     def _plotCube(self, ax, x, y, z, dx, dy, dz, color='red',mode=2):
         """ Auxiliary function to plot a cube. code taken somewhere from the web.  """
@@ -535,7 +416,7 @@ class Painter:
             
             counter = counter + 1  
         # plot bin 
-        self._plotCube(axGlob,0, 0, 0, float(self.width), float(self.height), float(self.depth),color='black',mode=1)
+        self._plotCube(axGlob,0, 0, 0, float(self.width), float(self.height), float(self.length),color='black',mode=1)
 
         plt.title('result')
         self.setAxesEqual(axGlob)

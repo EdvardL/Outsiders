@@ -9,17 +9,17 @@ def Pack(filename):
     
     packer = Packer()
 
-    # self, partno, WHD, max_weight,put_type=1
-    bin = Bin(partno=d['cargo_space']['id'], 
-              WHD=d['cargo_space']['size'],
-              max_weight=d['cargo_space']['carrying_capacity'] * 1000,
-              put_type=0)
+    bin_id = d['cargo_space']['id']
+    bin_ZXY = d['cargo_space']['size']
+
+    # self, partno, WHD, put_type=1
+    bin = Bin(partno=bin_id, ZXY=bin_ZXY, put_type=0)
     packer.addBin(bin)
     # self, partno,typeof, WHD, weight, level, updown, color
     for item in d['cargo_groups']:
-        packer.addItem(Item(partno=item['id'], 
+        packer.addItem(Item(partno=item['group_id'], 
                             typeof='cube',
-                            WHD=item['size'],
+                            ZXY=item['size'],
                             weight=item['mass'],
                             level=1,
                             updown=item['turnover'],
@@ -29,44 +29,64 @@ def Pack(filename):
     packer.pack(bigger_first=True,distribute_items=False,fix_point=True,number_of_decimals=0)
 
     b = packer.bins[0]
-    volume = b.width * b.height * b.depth
-    print(":::::::::::", b.string())
 
-    print("FITTED ITEMS:")
-    volume_t = 0
-    volume_f = 0
-    unfitted_name = ''
+    packed_cargos_info = [] 
+    count = 1
     for item in b.items:
-        print("partno : ",item.partno)
-        print("color : ",item.color)
-        print("position : ",item.position)
-        print("rotation type : ",item.rotation_type)
-        print("W*H*D : ",str(item.width) +'*'+ str(item.height) +'*'+ str(item.depth))
-        print("volume : ",float(item.width) * float(item.height) * float(item.depth))
-        print("weight : ",float(item.weight))
-        volume_t += float(item.width) * float(item.height) * float(item.depth)
-        print("***************************************************")
-    print("***************************************************")
-    print("UNFITTED ITEMS:")
+        dimension = item.getDimension()
+        item_info = {}
+        item_info["calculated_size"] = {"height": str(dimension[2]), "length": str(dimension[1]), "width": str(dimension[0])}
+        item_info["cargo_id"] = item.partno
+        item_info["id"] = count
+        item_info["mass"] = str(item.weight)
+        item_info["position"] = {"x": str(item.position[1]), "y": str(item.position[2]), "z": str(item.position[0])}
+        item_info["size"] = {"height": str(item.length), "length": str(item.height), "width": str(item.width)}
+        item_info["sort"] = 1
+        item_info["stacking"] = True
+        item_info["turnover"] = True
+        item_info["type"] = "box"
+        count += 1
+        packed_cargos_info.append(item_info)
+
+    unpacked_cargos_info = []
+
     for item in b.unfitted_items:
-        print("partno : ",item.partno)
-        print("color : ",item.color)
-        print("W*H*D : ",str(item.width) +'*'+ str(item.height) +'*'+ str(item.depth))
-        print("volume : ",float(item.width) * float(item.height) * float(item.depth))
-        print("weight : ",float(item.weight))
-        volume_f += float(item.width) * float(item.height) * float(item.depth)
-        unfitted_name += '{},'.format(item.partno)
-        print("***************************************************")
-    print("***************************************************")
-    print('space utilization : {}%'.format(round(volume_t / float(volume) * 100 ,2)))
-    print('residual volumn : ', float(volume) - volume_t )
-    print('unpack item : ',unfitted_name)
-    print('unpack item volume : ',volume_f)
-    print("gravity distribution : ",b.gravity)
+        item_info = {}
+        item_info["group_id"] =  item.partno,
+        item_info["id"] = 0,
+        item_info["mass"] = str(item.weight),
+        item_info["position"] = {"x": -1, "y": -1, "z": -1},
+        item_info["size"] = {"height": str(item.width), "length": str(item.height), "width": str(item.length)},
+        item_info["sort"] = 1
+        item_info["stacking"] = True
+        item_info["turnover"] = True
+        unpacked_cargos_info.append(item_info)
+
+    output_dict = {
+    "cargoSpace": {
+    "loading_size": {
+    "height": bin_ZXY[1],
+    "length": bin_ZXY[2],
+    "width": bin_ZXY[0]
+    },
+    "position": [
+    bin_ZXY[1]/2,
+    bin_ZXY[2]/2,
+    bin_ZXY[0]/2
+    ],
+    "type": "pallet"
+    },
+    "cargos": packed_cargos_info,
+    "unpacked": unpacked_cargos_info
+    }
+
+    with open("../Data/Output/3"+ filename, 'w') as fp:
+        json.dump(output_dict, fp)
+    print(output_dict)
 
     return b
 
-dirname = 'Data/_vg_85_bgg5jsons'
+dirname = '../Data/Input'
 dirnames = []
 filenames = []
 for dir in os.listdir(dirname):
@@ -77,14 +97,16 @@ for dir in os.listdir(dirname):
 
         start = time.time()
 
-        # b = Pack(filename)
+        b = Pack(filename)
 
         stop = time.time()
-        #print('used time : ',stop - start)
+        print('used time : ',stop - start)
 
         # draw results
         # painter = Painter(b)
         # painter.plotBoxAndItems()
+
+        
 
 print(*dirnames, sep='\n')
 print(*filenames, sep='\n')
