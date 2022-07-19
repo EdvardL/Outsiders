@@ -117,5 +117,5 @@ for file in os.listdir(dirname):
 
         
 
-print(*dirnames, sep='\n')
-print(*filenames, sep='\n')
+# print(*dirnames, sep='\n')
+# print(*filenames, sep='\n')
