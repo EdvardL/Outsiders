@@ -100,18 +100,16 @@ def Pack(filename):
 dirname = '/var/tmp/hackathon/data1'
 dirnames = []
 filenames = []
-for dir in os.listdir(dirname):
-    dirnames.append(dirname + '/' + dir)
-    for name in os.listdir(dirname + '/' + dir):
-        filename = dirname + '/' + dir + '/' + name
-        filenames.append(filename)
+for file in os.listdir(dirname):
+    filename = file
+    filenames.append(filename)
 
-        start = time.time()
+    start = time.time()
 
-        b = Pack(filename)
+    b = Pack(filename)
 
-        stop = time.time()
-        print('used time : ',stop - start)
+    stop = time.time()
+    print('used time : ',stop - start)
 
         # draw results
         # painter = Painter(b)
