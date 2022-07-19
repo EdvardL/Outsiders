@@ -78,8 +78,8 @@ for item in b.items:
     item_info["cargo_id"] = item.partno
     item_info["id"] = count
     item_info["mass"] = str(item.weight)
-    item_info["position"] = {"x": str(item.position[1]), "y": str(item.position[2]), "z": str(item.position[0])}
-    item_info["size"] = {"height": str(item.length), "length": str(item.height), "width": str(item.width)}
+    item_info["position"] = {"x": float(item.position[1]), "y": float(item.position[2]), "z": float(item.position[0])}
+    item_info["size"] = {"height": float(item.length), "length": float(item.height), "width": float(item.width)}
     item_info["sort"] = 1
     item_info["stacking"] = True
     item_info["turnover"] = True
@@ -96,7 +96,7 @@ for item in b.unfitted_items:
     item_info["id"] = 0,
     item_info["mass"] = str(item.weight),
     item_info["position"] = {"x": -1, "y": -1, "z": -1},
-    item_info["size"] = {"height": str(item.width), "length": str(item.height), "width": str(item.length)},
+    item_info["size"] = {"height": float(item.width), "length": float(item.height), "width": float(item.length)},
     item_info["sort"] = 1
     item_info["stacking"] = True
     item_info["turnover"] = True
