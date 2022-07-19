@@ -14,9 +14,9 @@ class Item:
         ''' '''
         self.partno = partno
         self.typeof = typeof
-        self.width = ZYX[0]
+        self.width = ZYX[2]
         self.height = ZYX[1]
-        self.length = ZYX[2]
+        self.length = ZYX[0]
         self.weight = weight
         # Packing Priority level ,choose 1-3
         self.level = level
@@ -77,8 +77,8 @@ class Bin:
     def __init__(self, partno, ZYX,put_type=1):
         ''' '''
         self.partno = partno
-        self.width = ZYX[0]
-        self.length = ZYX[2]
+        self.width = ZYX[2]
+        self.length = ZYX[0]
         self.height = ZYX[1]
         self.items = []
         self.fit_items = np.array([[0,ZYX[0],0,ZYX[1],0,0]])
